@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvo V90 B4 AWD — Checklist prohlídky</title>
+<style>
+  :root {
+    --blue: #003057;
+    --blue-light: #1a5276;
+    --blue-mid: #2e86c1;
+    --accent: #c8a030;
+    --green: #1e8449;
+    --red: #c0392b;
+    --orange: #d35400;
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6c757d;
+    --border: #dee2e6;
+    --shadow: 0 2px 12px rgba(0,48,87,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--blue); color: white;
+    display: flex; align-items: center; gap: 0;
+    padding: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    overflow-x: auto; white-space: nowrap;
+  }
+  nav .brand { padding: 14px 20px; font-weight: 700; font-size: 15px; letter-spacing: 0.5px; flex-shrink: 0; }
+  nav a { color: rgba(255,255,255,0.8); text-decoration: none; padding: 14px 14px; font-size: 13px; transition: all 0.2s; flex-shrink: 0; }
+  nav a:hover { color: white; background: var(--blue-light); }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
+    color: white; padding: 40px 24px 32px;
+  }
+  .hero h1 { font-size: 26px; font-weight: 300; letter-spacing: 1px; margin-bottom: 4px; }
+  .hero h1 strong { font-weight: 700; }
+  .hero .subtitle { opacity: 0.8; font-size: 14px; margin-bottom: 24px; }
+  .facts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; max-width: 700px; }
+  .fact { background: rgba(255,255,255,0.12); border-radius: 8px; padding: 12px 14px; }
+  .fact .label { font-size: 11px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .fact .value { font-size: 16px; font-weight: 600; }
+  .fact .value.warn { color: #f0c040; }
+  .fact .value.ok { color: #5dde85; }
+
+  /* PROGRESS */
+  .progress-bar-wrap { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; }
+  .progress-bar-wrap span { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .progress-bar { flex: 1; background: var(--border); border-radius: 10px; height: 8px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 10px; transition: width 0.4s; }
+  #progress-count { font-weight: 600; color: var(--blue); }
+
+  /* MAIN LAYOUT */
+  .container { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+
+  /* SECTION */
+  .section { margin-bottom: 32px; }
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--blue); color: white;
+    padding: 12px 18px; border-radius: 10px 10px 0 0;
+    cursor: pointer; user-select: none;
+  }
+  .section-header h2 { font-size: 15px; font-weight: 600; flex: 1; }
+  .section-header .badge { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 2px 10px; font-size: 12px; }
+  .section-header .toggle { opacity: 0.7; font-size: 18px; transition: transform 0.2s; }
+  .section-header.collapsed .toggle { transform: rotate(-90deg); }
+  .section-body { background: var(--card); border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; overflow: hidden; }
+  .section-body.hidden { display: none; }
+
+  /* CHECKLIST */
+  .phase { border-bottom: 1px solid var(--border); }
+  .phase:last-child { border-bottom: none; }
+  .phase-header { padding: 10px 18px; background: #f8f9fa; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--blue); }
+  .check-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 18px; border-top: 1px solid #f0f0f0; transition: background 0.15s; cursor: pointer; }
+  .check-item:hover { background: #f8fbff; }
+  .check-item input[type=checkbox] { margin-top: 2px; width: 18px; height: 18px; accent-color: var(--blue); cursor: pointer; flex-shrink: 0; }
+  .check-item label { font-size: 14px; line-height: 1.4; cursor: pointer; flex: 1; }
+  .check-item label .tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
+  .tag-critical { background: #fde8e8; color: var(--red); }
+  .tag-warn { background: #fef3e2; color: var(--orange); }
+  .tag-ok { background: #e8f8f0; color: var(--green); }
+  .check-item.done label { text-decoration: line-through; opacity: 0.5; }
+  .note { padding: 10px 18px 12px 48px; font-size: 12px; color: var(--muted); font-style: italic; background: #fafbfc; border-top: 1px solid #f0f0f0; }
+
+  /* EMAIL TEMPLATES */
+  .email-card { border-bottom: 1px solid var(--border); padding: 20px 18px; }
+  .email-card:last-child { border-bottom: none; }
+  .email-card h3 { font-size: 14px; color: var(--blue); margin-bottom: 6px; }
+  .email-card .subject { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .email-card .subject strong { color: var(--text); }
+  .email-body { background: #f8f9fa; border: 1px solid var(--border); border-radius: 6px; padding: 14px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; font-family: inherit; max-height: 280px; overflow-y: auto; }
+  .copy-btn {
+    margin-top: 10px; padding: 8px 18px;
+    background: var(--blue); color: white; border: none;
+    border-radius: 6px; font-size: 13px; cursor: pointer; transition: background 0.2s;
+  }
+  .copy-btn:hover { background: var(--blue-light); }
+  .copy-btn.copied { background: var(--green); }
+
+  /* NEGOTIATION */
+  .nego-step { border-bottom: 1px solid var(--border); padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; }
+  .nego-step:last-child { border-bottom: none; }
+  .nego-num { width: 28px; height: 28px; background: var(--blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .nego-content h3 { font-size: 14px; margin-bottom: 6px; }
+  .nego-content .script { background: #eef4fb; border-left: 3px solid var(--blue-mid); padding: 10px 12px; font-size: 13px; font-style: italic; border-radius: 0 6px 6px 0; line-height: 1.5; margin-top: 6px; }
+  .nego-content .saving { font-size: 12px; color: var(--green); font-weight: 600; margin-top: 4px; }
+
+  /* TARGET PRICE */
+  .target-box { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border: 2px solid var(--green); border-radius: 10px; padding: 20px; text-align: center; margin: 0 18px 18px; }
+  .target-box .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+  .target-box .price { font-size: 32px; font-weight: 700; color: var(--green); }
+  .target-box .note { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* KEY FACTS TABLE */
+  .kf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .kf-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+  .kf-table td:first-child { color: var(--muted); width: 40%; }
+  .kf-table td:last-child { font-weight: 500; }
+  .kf-table tr:last-child td { border-bottom: none; }
+  .ok-icon::before { content: "✅ "; }
+  .warn-icon::before { content: "⚠️ "; }
+  .red-icon::before { content: "🚨 "; }
+
+  /* CONTACT */
+  .contact-card { padding: 20px 18px; display: flex; gap: 16px; flex-wrap: wrap; }
+  .contact-item { flex: 1; min-width: 200px; }
+  .contact-item .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 4px; }
+  .contact-item .value { font-size: 15px; font-weight: 600; color: var(--blue); }
+  .contact-item a { color: var(--blue); text-decoration: none; }
+  .contact-item a:hover { text-decoration: underline; }
+  .map-btn { display: inline-block; margin-top: 14px; padding: 10px 20px; background: var(--blue); color: white; border-radius: 6px; text-decoration: none; font-size: 13px; }
+
+  /* ALERTS */
+  .alert { margin: 14px 18px; padding: 12px 14px; border-radius: 6px; font-size: 13px; line-height: 1.5; }
+  .alert-warn { background: #fef9e7; border-left: 4px solid var(--accent); }
+  .alert-critical { background: #fdecea; border-left: 4px solid var(--red); }
+  .alert-ok { background: #eafaf1; border-left: 4px solid var(--green); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .facts-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero h1 { font-size: 20px; }
+    nav .brand { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">🚗 Volvo V90</div>
+  <a href="#prehled">Přehled</a>
+  <a href="#checklist">Checklist</a>
+  <a href="#emaily">E-maily</a>
+  <a href="#vyjednavani">Vyjednávání</a>
+  <a href="#kontakt">Kontakt</a>
+</nav>
+
+<div class="hero">
+  <h1><strong>Volvo V90</strong> B4 AWD Diesel</h1>
+  <div class="subtitle">Bilia Outlet Jägersro, Malmö &nbsp;·&nbsp; EAD55B &nbsp;·&nbsp; YV1PWK5VCM1164090</div>
+  <div class="facts-grid">
+    <div class="fact"><div class="label">Rok výroby</div><div class="value warn">2020</div></div>
+    <div class="fact"><div class="label">Nájezd</div><div class="value">146 350 km</div></div>
+    <div class="fact"><div class="label">Cena inzerát</div><div class="value">244 900 SEK</div></div>
+    <div class="fact"><div class="label">Cílová cena</div><div class="value ok">220–225 tis.</div></div>
+    <div class="fact"><div class="label">STK platná do</div><div class="value ok">03/2027</div></div>
+    <div class="fact"><div class="label">Pohon</div><div class="value">AWD Haldex</div></div>
+    <div class="fact"><div class="label">Motor</div><div class="value">145 kW diesel</div></div>
+    <div class="fact"><div class="label">Tažná</div><div class="value">2 200 kg*</div></div>
+  </div>
+</div>
+
+<div class="progress-bar-wrap">
+  <span>Splněno: <span id="progress-count">0 / 0</span></span>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <span id="progress-pct">0 %</span>
+</div>
+
+<!-- ===== PŘEHLED ===== -->
+<div class="container" id="prehled">
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>📋 Klíčové informace</h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <table class="kf-table">
+        <tr><td>Datum výroby (Transportstyrelsen)</td><td class="warn-icon">2020-12-08 — ne 2021!</td></tr>
+        <tr><td>Poprvé přihlášeno ve Švédsku</td><td>2021-03-30</td></tr>
+        <tr><td>Fordonsstatus</td><td>Avställd od 2026-02-19 (normální)</td></tr>
+        <tr><td>Poslední STK (Bilprovningen)</td><td class="ok-icon">2026-01-28, platná do 2027-03-31</td></tr>
+        <tr><td>Tachometr při STK</td><td class="ok-icon">143 203 km (shoduje se s inzerátem)</td></tr>
+        <tr><td>Počet majitelů</td><td class="warn-icon">3 soukromé osoby</td></tr>
+        <tr><td>Import ze zahraničí</td><td class="ok-icon">Ne — původně švédské auto</td></tr>
+        <tr><td>Recall 20V144000</td><td class="warn-icon">AEB/City Safety — ověřit v VIDA</td></tr>
+        <tr><td>Recall 21V414000</td><td class="warn-icon">Palivové čerpadlo — ověřit v VIDA</td></tr>
+        <tr><td>Přední sklo</td><td class="warn-icon">Bilia vymění + ADAS kalibrace</td></tr>
+        <tr><td>Druhý klíč</td><td class="warn-icon">Bilia dodá — ověřit originál</td></tr>
+        <tr><td>Tažná 2 200 kg</td><td class="warn-icon">Vyžaduje skupinu BE (ne jen B)</td></tr>
+        <tr><td>Interiér</td><td>Umělá kůže (Momentum Advanced)</td></tr>
+        <tr><td>Harman Kardon</td><td class="ok-icon">Potvrzeno v inzerátu</td></tr>
+        <tr><td>Nezávislé topení</td><td class="ok-icon">Potvrzeno</td></tr>
+      </table>
+      <div class="alert alert-warn">⚠️ <strong>Rok výroby 2020</strong> — klíčový argument při vyjednávání. Inzerát říká 2021, Transportstyrelsen říká 2020. Použijte jako první vyjednávací páku.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHECKLIST ===== -->
+<div class="container" id="checklist">
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>✅ Checklist prohlídky</h2>
+      <span class="badge" id="checklist-badge">0 / 0</span>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+
+      <div class="phase">
+        <div class="phase-header">Před výjezdem — dokumenty e-mailem</div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c1"><label for="c1">VIDA servisní výpis obdržen e-mailem <span class="tag tag-critical">KRITICKÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c2"><label for="c2">Bilprovningen protokol z 28. 1. 2026 — plný report s naměřenými hodnotami <span class="tag tag-critical">KRITICKÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c3"><label for="c3">Potvrzení výměny skla + ADAS kalibrace (OEM sklo, podpis technika) <span class="tag tag-critical">KRITICKÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c4"><label for="c4">Sklo vyměněno PŘED návštěvou (nelze testovat ADAS bez výměny) <span class="tag tag-warn">DŮLEŽITÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c5"><label for="c5">COC dokument (Certificate of Conformity) — nutný pro registraci v ČR <span class="tag tag-critical">KRITICKÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c6"><label for="c6">Záznamy o výměně oleje v Aisin 8AT automatu <span class="tag tag-warn">DŮLEŽITÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c7"><label for="c7">Záznamy o výměně oleje Haldex AWD</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c8"><label for="c8">Export plates (provnummer) — Bilia zajistí pro jízdu zpět do ČR <span class="tag tag-warn">DŮLEŽITÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c9"><label for="c9">Tranzitní pojištění sjednáno (platné pro cestu Malmö → Praha)</label></div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">U dealera — dokumenty a klíče</div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c10"><label for="c10">VIDA výpis fyzicky předán — záznamy odpovídají nájezdu</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c11"><label for="c11">Bilprovningen protokol — naměřené hodnoty brzd, pneumatik, podvozku</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c12"><label for="c12">Oba klíče fyzicky přítomny — otestovat keyless entry + start</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c13"><label for="c13">COC dokument přítomen a odpovídá VIN</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c14"><label for="c14">Podmínky záruky Bilia — délka, krytí, platí v zahraničí?</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c15"><label for="c15">Recalls 20V144000 + 21V414000 — provedeny? Záznam v VIDA?</label></div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">Exteriér</div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c16"><label for="c16">Lak — tloušťkoměr na všech panelech (odhalí přelakovávání)</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c17"><label for="c17">Nové přední sklo — OEM logo (AGC/Pilkington), bez bublin a deformací</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c18"><label for="c18">Karoserie — prahy, dveře, kapota (koroze zdola, stopy po nárazu)</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c19"><label for="c19">Pneumatiky — profil min. 4 mm, DOT max. 5 let, rovnoměrné opotřebení</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c20"><label for="c20">Brzdové kotouče pohledem přes ráfek — drážky, tloušťka</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c21"><label for="c21">Spodek vozu — koroze nosníků, úniky oleje, tlumiče</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c22"><label for="c22">Zimní kola — ptát se zda jsou k autu</label></div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">Interiér</div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c23"><label for="c23">Sedačky — umělá kůže bez loupání a praskání (Momentum trim)</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c24"><label for="c24">Volant a pedály — opotřebení odpovídá 146 tis. km</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c25"><label for="c25">Koberečky — bez vlhkosti (indikátor zatékání)</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c26"><label for="c26">Infotainment Sensus — bez prasklin, reaguje na dotek</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c27"><label for="c27">Harman Kardon — všechny reproduktory fungují <span class="tag tag-warn">OVĚŘIT</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c28"><label for="c28">Nezávislé topení — test spuštění</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c29"><label for="c29">Klimatizace, vyhřívaný volant, vyhřívání zadních sedaček</label></div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">Pod kapotou</div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c30"><label for="c30">Motorový olej — barva (tmavý = OK, šedivý/pěnivý = problém)</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c31"><label for="c31">Chladivo — hladina, barva (zelená/modrá = OK, hnědá = koroze)</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c32"><label for="c32">Viditelné úniky oleje nebo chladiva</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c33"><label for="c33">Řemen BSG (48V mild hybrid) — bez trhlin a opotřebení</label></div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">OBD Diagnostika (Carista app)</div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c34"><label for="c34">Žádné aktivní chybové kódy (DTC) <span class="tag tag-critical">KRITICKÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c35"><label for="c35">DPF — stupeň zanesení pod 50 % <span class="tag tag-warn">DŮLEŽITÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c36"><label for="c36">Senzory NOx — hodnoty v normě</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c37"><label for="c37">EGR, BSG 48V, Haldex, Aisin 8AT — bez chyb</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c38"><label for="c38">Žádné uložené historické kódy (nebo vysvětlení proč)</label></div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">ADAS systémy <em>(kritické po výměně skla)</em></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c39"><label for="c39">Pilot Assist — aktivace, sleduje pruh na dálnici <span class="tag tag-critical">KRITICKÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c40"><label for="c40">City Safety — žádná varovná kontrolka na palubní desce <span class="tag tag-critical">KRITICKÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c41"><label for="c41">BLIS (mrtvý úhel), přední + zadní parkovací senzory, zadní kamera</label></div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">Zkušební jízda</div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c42"><label for="c42">Auto studené (nestartované 2+ hod) — test rozvodového řetězu <span class="tag tag-critical">KRITICKÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c43"><label for="c43">Studený start — žádné klepání prvních 5 sekund <span class="tag tag-critical">KRITICKÉ</span></label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c44"><label for="c44">Automat — plynulé řazení, bez kopání nebo zdráhání</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c45"><label for="c45">Brzdy, řízení, vibrace, šum ložisek kol</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c46"><label for="c46">Dálniční úsek — DPF bez výstrahy, Pilot Assist funkční</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c47"><label for="c47">Po zastavení — žádné úniky pod autem po 10 minutách</label></div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-header">Export a administrativa</div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c48"><label for="c48">Export plates (provnummer) dohodnuty — platné min. 1 měsíc</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c49"><label for="c49">Exportní faktura — možnost bez švédského DPH?</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c50"><label for="c50">COC dokument fyzicky předán při podpisu</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c51"><label for="c51">Protokol výměny skla + ADAS kalibrace fyzicky předán</label></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="c52"><label for="c52">IBAN ověřen přímo u dealera (ne z e-mailu — riziko podvodu)</label></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== E-MAILY ===== -->
+<div class="container" id="emaily">
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>📧 E-mailové šablony</h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+
+      <div class="email-card">
+        <h3>E-mail č. 1 — Příprava dokumentů před návštěvou</h3>
+        <div class="subject">Předmět: <strong>Volvo V90 EAD55B — Pre-purchase inspection visit</strong></div>
+        <div class="email-body" id="email1">Dear Bilia Outlet team,
+
+I am interested in purchasing the Volvo V90 B4 AWD Diesel (registration EAD55B, VIN YV1PWK5VCM1164090) currently listed at your dealership.
+
+I am planning to travel from the Czech Republic to visit your dealership for a full inspection. Before confirming my travel date, I have a few questions and requests:
+
+1. DOCUMENTS TO PREPARE FOR MY VISIT
+
+Could you please have the following ready when I arrive:
+- Full VIDA service history printout
+- Complete Bilprovningen inspection protocol from January 28, 2026 (full report with all measured values: brake pad thickness, tyre tread depth, undercarriage notes)
+- Windshield replacement certificate: date, glass spec (OEM Volvo-spec confirmed), and ADAS camera calibration report signed by the technician
+- Documentation of gearbox oil change (Aisin 8-speed automatic) and Haldex oil service
+- COC document (Certificate of Conformity) — required for registration in the Czech Republic
+
+These documents are a condition for proceeding with the purchase.
+
+2. WINDSHIELD REPLACEMENT
+
+Has the windshield been replaced yet? I need to test drive the car and verify ADAS systems (Pilot Assist, City Safety) are fully operational after camera recalibration. Please confirm this will be done before my visit.
+
+3. EXPORT PLATES
+
+I will drive the car back to the Czech Republic and will need Swedish export plates (provnummer). Can you arrange these as part of the purchase?
+
+4. TEST DRIVE
+
+I would like a test drive of at least 30–40 minutes including a motorway section. Please ensure the car has not been started for at least 2 hours before my arrival (cold start observation).
+
+5. SECOND KEY
+
+Please confirm the second key will be a genuine Volvo key, fully programmed and functional at handover.
+
+Could you suggest available dates for my visit?
+
+Thank you.
+
+Kind regards,
+[Vaše jméno]
+[Váš telefon]</div>
+        <button class="copy-btn" onclick="copyEmail('email1', this)">📋 Kopírovat e-mail</button>
+      </div>
+
+      <div class="email-card">
+        <h3>E-mail č. 2 — Follow-up (bez odpovědi 3 dny)</h3>
+        <div class="subject">Předmět: <strong>Follow-up: Volvo V90 EAD55B — visit inquiry</strong></div>
+        <div class="email-body" id="email2">Dear Bilia Outlet team,
+
+I sent an enquiry a few days ago regarding the Volvo V90 (EAD55B) and have not yet received a reply. I remain interested in the vehicle and would like to arrange a visit.
+
+Could you please confirm:
+- Are the documents I requested (VIDA history, Bilprovningen protocol, windshield/ADAS certificate) available?
+- Has the windshield been replaced?
+- What dates are available for an inspection visit?
+
+I am ready to travel at short notice.
+
+Thank you.
+
+Kind regards,
+[Vaše jméno]
+[Váš telefon]</div>
+        <button class="copy-btn" onclick="copyEmail('email2', this)">📋 Kopírovat e-mail</button>
+      </div>
+
+      <div class="email-card">
+        <h3>E-mail č. 3 — Potvrzení návštěvy (den před)</h3>
+        <div class="subject">Předmět: <strong>Volvo V90 EAD55B — visit confirmation [DATUM]</strong></div>
+        <div class="email-body" id="email3">Dear Bilia team,
+
+I am confirming my visit for [DATUM] at [ČAS].
+
+A few final requests:
+- Please ensure the car has not been started for at least 2 hours before my arrival (cold start test)
+- Please have all documents ready: VIDA printout, Bilprovningen protocol, windshield/ADAS certificate, COC document
+- I will bring my own OBD reader — I would like to connect it before the test drive
+
+I plan to spend approximately 3–4 hours at the dealership including a test drive.
+
+See you on [DATUM].
+
+Kind regards,
+[Vaše jméno]
+[Váš telefon]</div>
+        <button class="copy-btn" onclick="copyEmail('email3', this)">📋 Kopírovat e-mail</button>
+      </div>
+
+      <div class="alert alert-warn" style="margin:16px 18px;">
+        <strong>⚠️ Varovné signály v odpovědi:</strong> Odmítnutí VIDA výpisu nebo Bilprovningen protokolu · Vyhýbání se otázce ADAS kalibrace · "Dokumenty budou až na místě" bez konkrétního příslibu · Žádná odpověď na opakovanou zprávu.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== VYJEDNÁVÁNÍ ===== -->
+<div class="container" id="vyjednavani">
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>💰 Vyjednávací taktika</h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+
+      <div class="target-box">
+        <div class="label">Cílová cena</div>
+        <div class="price">220 000 – 225 000 SEK</div>
+        <div class="note">Původní cena: 244 900 SEK &nbsp;·&nbsp; Prostor pro slevu: ~8–10 %</div>
+      </div>
+
+      <div class="nego-step">
+        <div class="nego-num">1</div>
+        <div class="nego-content">
+          <h3>Rok výroby 2020 (nejsilnější argument)</h3>
+          <div class="script">"According to the Swedish Transport Agency (Transportstyrelsen), this vehicle was manufactured on December 8th, 2020 — not 2021 as stated in the listing. The market values 2020 vehicles accordingly, and I'd like the price to reflect that."</div>
+          <div class="saving">Potenciální sleva: 8 000–10 000 SEK</div>
+        </div>
+      </div>
+
+      <div class="nego-step">
+        <div class="nego-num">2</div>
+        <div class="nego-content">
+          <h3>Chybí tažné zařízení</h3>
+          <div class="script">"The car is listed without a tow bar, which I will need to add at an additional cost of approximately 1,500 EUR. I'd like this reflected in the price."</div>
+          <div class="saving">Potenciální sleva: 10 000–15 000 SEK</div>
+        </div>
+      </div>
+
+      <div class="nego-step">
+        <div class="nego-num">3</div>
+        <div class="nego-content">
+          <h3>Nájezd + doba u dealera</h3>
+          <div class="script">"At 146,000 km on a 2020 model, combined with the car being in your inventory since December 2025, I'd like to propose 220,000 SEK."</div>
+          <div class="saving">Psychologický argument — auto u Bilia 5 měsíců</div>
+        </div>
+      </div>
+
+      <div class="nego-step">
+        <div class="nego-num">4</div>
+        <div class="nego-content">
+          <h3>Rychlé uzavření</h3>
+          <div class="script">"I'm prepared to sign and transfer payment this week. No delays, no financing — immediate transaction."</div>
+          <div class="saving">Jistota prodeje = silná páka</div>
+        </div>
+      </div>
+
+      <div class="nego-step">
+        <div class="nego-num">5</div>
+        <div class="nego-content">
+          <h3>Package deal (pokud nechtějí slevit)</h3>
+          <div class="script">"If the price of 244,900 SEK is firm, would you be willing to include: tow bar installation, an extended warranty, and a service check at handover?"</div>
+          <div class="saving">Hodnota balíčku: 20 000–30 000 SEK</div>
+        </div>
+      </div>
+
+      <div class="alert alert-critical" style="margin:0 18px 18px;">
+        <strong>🚨 Absolutní minimum:</strong> Pokud cena neklesne pod 235 000 SEK a není přidána hodnota (záruka / tažné) — je lepší odejít. Alternativa: V90 D4 AWD Inscription 2019 z Německa za €21 999.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== KONTAKT ===== -->
+<div class="container" id="kontakt">
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>📍 Kontakt a navigace</h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="contact-card">
+        <div class="contact-item">
+          <div class="label">Dealer</div>
+          <div class="value">Bilia Outlet Jägersro</div>
+        </div>
+        <div class="contact-item">
+          <div class="label">Adresa</div>
+          <div class="value"><a href="https://maps.google.com/?q=Agnesfridsvägen+179,+Malmö" target="_blank">Agnesfridsvägen 179, Malmö</a></div>
+        </div>
+        <div class="contact-item">
+          <div class="label">Telefon</div>
+          <div class="value"><a href="tel:+46104974450">010-4974450</a></div>
+        </div>
+        <div class="contact-item">
+          <div class="label">Otevřeno</div>
+          <div class="value">Po–Pá 9–18 · So–Ne 11–16</div>
+        </div>
+      </div>
+      <div style="padding: 0 18px 18px;">
+        <a class="map-btn" href="https://maps.google.com/?q=Agnesfridsvägen+179,+Malmö,+Sweden" target="_blank">🗺️ Otevřít v Google Maps</a>
+        &nbsp;
+        <a class="map-btn" href="https://www.bilia.se/outlet/" target="_blank" style="background: var(--blue-mid);">🌐 Web Bilia Outlet</a>
+      </div>
+      <div class="alert alert-ok">
+        <strong>✅ Plánovat:</strong> Příjezd ráno (auto studené = test řetězu) · Počítat 3–4 hodiny · Vzít OBD čtečku (Carista BT adaptér) + tloušťkoměr laku + baterku.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center; padding: 24px; color: var(--muted); font-size: 12px;">
+  Volvo V90 B4 AWD · EAD55B · YV1PWK5VCM1164090 · Bilia Outlet Malmö
+</div>
+
+<script>
+  // TOGGLE SECTIONS
+  function toggleSection(header) {
+    header.classList.toggle('collapsed');
+    header.nextElementSibling.classList.toggle('hidden');
+  }
+
+  // CHECKBOX LOGIC
+  function toggleCheck(item) {
+    const cb = item.querySelector('input[type=checkbox]');
+    cb.checked = !cb.checked;
+    item.classList.toggle('done', cb.checked);
+    saveState();
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const all = document.querySelectorAll('.check-item input[type=checkbox]');
+    const done = document.querySelectorAll('.check-item input[type=checkbox]:checked');
+    const pct = all.length ? Math.round(done.length / all.length * 100) : 0;
+    document.getElementById('progress-count').textContent = `${done.length} / ${all.length}`;
+    document.getElementById('checklist-badge').textContent = `${done.length} / ${all.length}`;
+    document.getElementById('progress-pct').textContent = pct + ' %';
+    document.getElementById('progress-fill').style.width = pct + '%';
+  }
+
+  // LOCALSTORAGE
+  function saveState() {
+    const state = {};
+    document.querySelectorAll('.check-item input[type=checkbox]').forEach(cb => {
+      state[cb.id] = cb.checked;
+    });
+    localStorage.setItem('volvo-checklist', JSON.stringify(state));
+  }
+
+  function loadState() {
+    const raw = localStorage.getItem('volvo-checklist');
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    document.querySelectorAll('.check-item input[type=checkbox]').forEach(cb => {
+      if (state[cb.id]) {
+        cb.checked = true;
+        cb.closest('.check-item').classList.add('done');
+      }
+    });
+  }
+
+  // COPY EMAIL
+  function copyEmail(id, btn) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✅ Zkopírováno!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = '📋 Kopírovat e-mail';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // INIT
+  loadState();
+  updateProgress();
+</script>
+</body>
+</html>
